@@ -1,0 +1,4 @@
+-std=c17
+-Weverything
+-Wno-c99-compat
+-Wno-declaration-after-statement
