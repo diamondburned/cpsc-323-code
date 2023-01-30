@@ -1,0 +1,6 @@
+-std=c++17
+-Weverything
+-Wno-c++98-compat-pedantic
+-Wno-c++11-compat-pedantic
+-Wno-c++14-compat-pedantic
+-fdiagnostics-show-category=name

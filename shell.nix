@@ -39,6 +39,7 @@ in mkshell {
 		git
 		objconv
 		go
+		clang-analyzer
 	] ++ [
 		clangd
 		clang
