@@ -1,0 +1,15 @@
+Enter a postfix expression with a $ at the end:
+20 jerry 45 + tom - * $ 
+Enter the value of jerry: 10
+Enter the value of tom: 5
+Expression's value is 1000
+
+CONTINUE(y/n)? y
+
+Enter a postfix expression with a $ at the end:
+myscore yourscore 45 + 100 + * $
+Enter the value of myscore: 3
+Enter the value of yourscore: 5
+Expression's value is 450
+
+CONTINUE(y/n)? n
