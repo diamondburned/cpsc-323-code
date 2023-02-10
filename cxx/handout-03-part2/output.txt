@@ -1,0 +1,15 @@
+C:\Users\Erik\CLionProjects\cpsc-323-assignment-03-2\cmake-build-debug\cpsc_323_assignment_03_2.exe
+Enter a Word with $ at the end:abbbcaaa$
+ abbbcaaa$ is rejected.
+
+CONTINUE(y/n)?y
+ Enter a Word with $ at the end:ccccbbb$
+ ccccbbb$ is rejected.
+
+CONTINUE(y/n)?y
+ Enter a Word with $ at the end:aabbcbbb$
+ aabbcbbb$ is rejected.
+
+CONTINUE(y/n)?n
+
+Process finished with exit code 0
