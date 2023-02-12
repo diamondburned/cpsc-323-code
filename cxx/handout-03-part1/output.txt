@@ -1,0 +1,11 @@
+Token       number      identifier  reserved word
+-------------------------------------------------
+K-mart      no          no          no
+23andMe     no          no          no
+456         yes         no          no
+Tax 2018    no          no          no
+While       no          yes         no
+switch      no          no          yes
+do_it       no          yes         no
+_Fall_20    no          yes         no
+_Jan 19     no          no          no
