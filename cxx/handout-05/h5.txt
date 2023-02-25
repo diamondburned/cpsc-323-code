@@ -1,0 +1,16 @@
+            ** This program computes and prints the value
+                  Of an expression **
+           var
+               ** declare variables **
+               tom ,       jerry     : integer ;
+         begin
+                  tom               = 3 ;
+                  jerry =          4 ;
+                 
+            write(   tom );  ** display tom **
+
+
+                 ** compute the value of the expression **
+                 jerry   =    tom    +    jerry          ;
+                 write (  jerry   ) ;  ** print the value of  jerry **
+           end.
