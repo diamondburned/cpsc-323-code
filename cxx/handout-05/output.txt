@@ -1,0 +1,11 @@
+******************** New file ********************
+           var
+               tom , jerry : integer ;
+         begin
+                  tom = 3 ;
+                  jerry = 4 ;
+            write( tom ); 
+                 jerry = tom + jerry ;
+                 write ( jerry ) ; 
+           end.
+**************************************************
