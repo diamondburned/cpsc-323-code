@@ -1,0 +1,40 @@
+Enter an expression with '$' at the end:(i+i)*i$
+
+Successfully Parsed The Expression!
+Match '('  |  $QR)E
+Match 'i'  |  $QR)QR
+Match '+'  |  $QR)QT
+Match 'i'  |  $QR)QR
+Match ')'  |  $QR
+Match '*'  |  $QRF
+Match 'i'  |  $QR
+Match '$'  |
+
+CONTINUE(y/n)?y
+
+Enter an expression with '$' at the end:i*(i-i)$
+
+Successfully Parsed The Expression!
+Match 'i'  |  $QR
+Match '*'  |  $QRF
+Match '('  |  $QR)E
+Match 'i'  |  $QR)QR
+Match '-'  |  $QR)QT
+Match 'i'  |  $QR)QR
+Match ')'  |  $QR
+Match '$'  |
+
+CONTINUE(y/n)?y
+
+Enter an expression with '$' at the end:i(i+i)$
+
+Error at index 1 | i(i+i)$
+                    ^
+
+Match 'i'  |  $QR
+Ran into error.
+
+CONTINUE(y/n)?n
+
+
+Process finished with exit code 0
