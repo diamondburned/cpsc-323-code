@@ -1,0 +1,50 @@
+Enter an expression with '$' at the end:a=(a+a)*a$
+
+Successfully Parsed The Expression!
+Match 'a'  |  $W
+Match '='  |  $E
+Match '('  |  $QR)E
+Match 'a'  |  $QR)QR
+Match '+'  |  $QR)QT
+Match 'a'  |  $QR)QR
+Match ')'  |  $QR
+Match '*'  |  $QRF
+Match 'a'  |  $QR
+Match '$'  |
+
+CONTINUE(y/n)?y
+
+Enter an expression with '$' at the end:a=a*(a-a)$
+
+Successfully Parsed The Expression!
+Match 'a'  |  $W
+Match '='  |  $E
+Match 'a'  |  $QR
+Match '*'  |  $QRF
+Match '('  |  $QR)E
+Match 'a'  |  $QR)QR
+Match '-'  |  $QR)QT
+Match 'a'  |  $QR)QR
+Match ')'  |  $QR
+Match '$'  |
+
+CONTINUE(y/n)?y
+
+Enter an expression with '$' at the end:a=(a+a)a$
+
+Error at index 7 | a=(a+a)a$
+                          ^
+
+Match 'a'  |  $W
+Match '='  |  $E
+Match '('  |  $QR)E
+Match 'a'  |  $QR)QR
+Match '+'  |  $QR)QT
+Match 'a'  |  $QR)QR
+Match ')'  |  $QR
+Ran into error.
+
+CONTINUE(y/n)?n
+
+
+Process finished with exit code 0
