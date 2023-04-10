@@ -1,0 +1,52 @@
+C:\Users\Erik\CLionProjects\lrparserassignment\cmake-build-debug\lrparserassignment.exe
+Expression:(i*)$
+
+================================
+Stack: 0
+Popped: 0
+Read: (
+[0, (] = S4
+Push: 0, (, 4
+================================
+Stack: 0 ( 4
+Popped: 4
+Read: i
+[4, i] = S5
+Push: 4, i, 5
+================================
+Stack: 0 ( 4 i 5
+Popped: 5
+Read: *
+[5, *] = R8
+Push: 5
+Rule #8: F -> i
+Pop 2 times
+Stack: 0 ( 4
+Popped: 4
+[4, F] = 3
+Push: 4, F, 3
+================================
+Stack: 0 ( 4 F 3
+Popped: 3
+[3, *] = R6
+Push: 3
+Rule #6: T -> F
+Pop 2 times
+Stack: 0 ( 4
+Popped: 4
+[4, T] = 2
+Push: 4, T, 2
+================================
+Stack: 0 ( 4 T 2
+Popped: 2
+[2, *] = S8
+Push: 2, *, 8
+================================
+Stack: 0 ( 4 T 2 * 8
+Popped: 8
+Read: )
+[8, )] is empty!
+
+INVALID EXPRESSION
+
+Process finished with exit code 0
