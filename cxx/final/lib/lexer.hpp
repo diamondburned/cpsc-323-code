@@ -1,4 +1,6 @@
+#include <iomanip>
 #include <istream>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -13,6 +15,7 @@ struct Token {
   enum Type {
     WORD,
     PUNCT,
+    STRING,
     COMMENT,
   };
 
@@ -31,6 +34,9 @@ struct Token {
       case WORD:
       case PUNCT:
         out << t.value;
+        break;
+      case STRING:
+        out << std::quoted(t.value);
         break;
       case COMMENT:
         out << "// " << t.value << " //";

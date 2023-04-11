@@ -96,6 +96,7 @@ enum lexState {
   LINE,
   WORD,
   PUNCT,
+  STRING,
   COMMENT,
   END,
 };
@@ -110,6 +111,10 @@ static const std::unordered_map<lexState, lexFunc> lexStateFuncs({
      [](lexingState& state) {
        if (state.peek() == '\n') {
          return LINE;
+       }
+
+       if (state.peek() == '"') {
+         return STRING;
        }
 
        if (state.peek() == '/') {
@@ -160,6 +165,16 @@ static const std::unordered_map<lexState, lexFunc> lexStateFuncs({
        char terminator = state.getc();
        state.line.push_back(
            {start, start + 1, Token::PUNCT, std::string(1, terminator)});
+       return START;
+     }},
+    {STRING,
+     [](lexingState& state) {
+       int64_t start = state.in.tellg();
+       state.get();  // consume the opening quote
+       auto str = state.slurp([](char c) { return c != '"'; });
+       state.get();  // consume the closing quote
+       int64_t end = state.in.tellg();
+       state.line.push_back({start, end, Token::STRING, str});
        return START;
      }},
     {COMMENT,
