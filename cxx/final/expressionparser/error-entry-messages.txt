@@ -1,0 +1,21 @@
+<prog> ? | program is expected
+<type> ? | integer is expected
+<term-prime> ? | ; is expected
+<number-recursion> p | ; is expected
+<number-recursion> q | ; is expected
+<number-recursion> r | ; is expected
+<number-recursion> s | ; is expected
+<number-recursion> display | ; is expected
+<number-recursion> end. | ; is expected
+<identifier-recursion> ? | , is expected
+<identifier-recursion> display | ) is expected
+<identifier-recursion> end. | ; is expected
+<identifier-recursion> var | ; is expected
+<identifier-recursion> integer | : is expected
+<stat-list-prime> d | display is expected
+<stat-list-prime> i | display is expected
+<stat-list-prime> e | end. is expected
+<stat-list-prime> n | end. is expected
+<stat-list-prime> . | end. is expected
+<write-prime> " | String written incorrectly. Should be "value=".
+
