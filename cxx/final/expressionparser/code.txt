@@ -1,11 +1,9 @@
-program s2023 ;
-var
-p1 , p2q , pr : integer ;
-begin
-p1 = 3 ;
-p2q = 4 ;
-pr = p1 + p2q ;
-display ( pr ) ;
-pr = p1 * ( p2q + 2 * pr ) ;
-display ( "value=" , pr ) ;
+program s2023;
+var p1, p2q, pr : integer;
+begin p1 = 3;
+p2q = 4;
+pr = p1 + p2q;
+display(pr);
+pr = p1 * (p2q + 2 * pr);
+display("value=", pr);
 end.
