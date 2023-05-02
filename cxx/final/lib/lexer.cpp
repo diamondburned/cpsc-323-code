@@ -117,7 +117,7 @@ static const std::unordered_map<lexState, lexFunc> lexStateFuncs({
          return STRING;
        }
 
-       if (state.peek() == '/') {
+       if (state.aheadIs("//")) {
          return COMMENT;
        }
 
