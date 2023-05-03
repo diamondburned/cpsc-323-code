@@ -3,25 +3,25 @@
 <identifier> -> <letter> <identifier-recursion>
 <identifier-recursion> -> <letter> <identifier-recursion>
 <identifier-recursion> -> <digit> <identifier-recursion>
-<identifier-recursion> -> lambda
+<identifier-recursion> -> λ
 
 <dec-list> -> <dec> : <type> ;
 
 <dec> -> <identifier> <dec-prime>
 <dec-prime> -> , <identifier> <dec-prime>
-<dec-prime> -> lambda
+<dec-prime> -> λ
 
 <type> -> integer
 
 <stat-list> -> <stat> <stat-list-prime>
 <stat-list-prime> -> <stat> <stat-list-prime>
-<stat-list-prime> -> lambda
+<stat-list-prime> -> λ
 
 <stat> -> <write>
 <stat> -> <assign>
 
 <write> -> display ( <write-prime> ) ;
-<write-prime> -> "value=" , <identifier>
+<write-prime> -> σ , <identifier>
 <write-prime> -> <identifier>
 
 <assign> -> <identifier> = <expr> ;
@@ -29,12 +29,12 @@
 <expr> -> <term> <expr-prime>
 <expr-prime> -> + <term> <expr-prime>
 <expr-prime> -> - <term> <expr-prime>
-<expr-prime> -> lambda
+<expr-prime> -> λ
 
 <term> -> <factor> <term-prime>
 <term-prime> -> * <factor> <term-prime>
 <term-prime> -> / <factor> <term-prime>
-<term-prime> -> lambda
+<term-prime> -> λ
 
 <factor> -> ( <expr> )
 <factor> -> <identifier>
@@ -42,11 +42,11 @@
 
 <number> -> <sign> <digit> <number-recursion>
 <number-recursion> -> <digit> <number-recursion>
-<number-recursion> -> lambda
+<number-recursion> -> λ
 
 <sign> -> +
 <sign> -> -
-<sign> -> lambda
+<sign> -> λ
 
 <digit> -> 0
 <digit> -> 1

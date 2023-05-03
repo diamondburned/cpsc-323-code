@@ -243,4 +243,12 @@ Lines removeComments(const Lines& lines) {
 
   return result;
 }
+
+std::vector<Token> flatten(const Lines& lines) {
+  std::vector<Token> result;
+  for (const auto& line : lines) {
+    std::copy(line.begin(), line.end(), std::back_inserter(result));
+  }
+  return result;
+}
 }  // namespace Lexer

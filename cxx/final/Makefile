@@ -1,4 +1,4 @@
-.PHONY: all
+.PHONY: all run
 
 CXX ?= g++
 CXXFLAGS ?= $(shell echo $$(cat compile_flags.txt))
@@ -6,7 +6,10 @@ CXXFLAGS ?= $(shell echo $$(cat compile_flags.txt))
 LIBCXXFILES := $(shell find lib -type f -name '*.cpp')
 LIBHXXFILES := $(shell find lib -type f -name '*.hpp')
 
-all: stage1.out
+all: main.out
 
-stage1.out: stage1.cpp $(LIBCXXFILES) $(LIBHXXFILES)
-	$(CXX) $(CXXFLAGS) -O1 -o $@ $< $(LIBCXXFILES)
+run: main.out
+	./main.out program.txt
+
+main.out: main.cpp $(LIBCXXFILES) $(LIBHXXFILES)
+	$(CXX) $(CXXFLAGS) -O1 -g -o $@ $< $(LIBCXXFILES)

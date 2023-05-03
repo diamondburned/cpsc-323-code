@@ -7,5 +7,5 @@ p2q = 4 ;
 pr = p1 + p2q ;
 display ( pr ) ;
 pr = p1 * ( p2q + 2 * pr ) ;
-display ( " value = " , pr ) ;
+display ( "value=" , pr ) ;
 end.
