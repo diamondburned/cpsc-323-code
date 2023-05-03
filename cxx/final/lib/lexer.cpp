@@ -1,6 +1,7 @@
 #include "lexer.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <functional>
 #include <iostream>
 #include <sstream>
@@ -153,7 +154,8 @@ static const std::unordered_map<lexState, lexFunc> lexStateFuncs({
     {WORD,
      [](lexingState& state) {
        int64_t start = state.in.tellg();
-       auto word = state.slurp([](char c) { return std::isalnum(c); });
+       auto word =
+           state.slurp([](char c) { return std::isalnum(c) || c == '.'; });
 
        int64_t end = state.in.tellg();
        state.line.push_back(Token{start, end, Token::WORD, word});
