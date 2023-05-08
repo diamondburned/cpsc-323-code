@@ -1,0 +1,65 @@
+<prog> -> program <identifier> ; var <dec-list> begin <stat-list> end. | #include \<iostream> \n \n int main() { \n \t <dec-list> <stat-list> \n \t return 0; \n }
+
+<identifier> -> <letter> <identifier-recursion>
+<identifier-recursion> -> <letter> <identifier-recursion>
+<identifier-recursion> -> <digit> <identifier-recursion>
+<identifier-recursion> -> lambda
+
+<dec-list> -> <dec> : <type> ; | <type> <dec> ; \n \t
+
+<dec> -> <identifier> <dec-prime>
+<dec-prime> -> , <identifier> <dec-prime>
+<dec-prime> -> lambda
+
+<type> -> integer | int
+
+<stat-list> -> <stat> <stat-list-prime>
+<stat-list-prime> -> <stat> <stat-list-prime>
+<stat-list-prime> -> lambda
+
+<stat> -> <write>
+<stat> -> <assign>
+
+<write> -> display ( <write-prime> ) ; | std::cout << <write-prime> << std::endl; \n \t
+<write-prime> -> "value=" , <identifier> | "value=" << <identifier> \s
+<write-prime> -> <identifier> | <identifier> \s
+
+<assign> -> <identifier> = <expr> ; | <identifier> \s = <expr> ; \n \t
+
+<expr> -> <term> <expr-prime>
+<expr-prime> -> + <term> <expr-prime>
+<expr-prime> -> - <term> <expr-prime>
+<expr-prime> -> lambda
+
+<term> -> <factor> <term-prime>
+<term-prime> -> * <factor> <term-prime>
+<term-prime> -> / <factor> <term-prime>
+<term-prime> -> lambda
+
+<factor> -> ( <expr> )
+<factor> -> <identifier>
+<factor> -> <number>
+
+<number> -> <sign> <digit> <number-recursion>
+<number-recursion> -> <digit> <number-recursion>
+<number-recursion> -> lambda
+
+<sign> -> + | lambda
+<sign> -> -
+<sign> -> lambda
+
+<digit> -> 0
+<digit> -> 1
+<digit> -> 2
+<digit> -> 3
+<digit> -> 4
+<digit> -> 5
+<digit> -> 6
+<digit> -> 7
+<digit> -> 8
+<digit> -> 9
+
+<letter> -> p
+<letter> -> q
+<letter> -> r
+<letter> -> s
