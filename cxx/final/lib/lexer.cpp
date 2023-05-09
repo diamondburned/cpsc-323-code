@@ -15,7 +15,7 @@ namespace Lexer {
 namespace {
 struct lexingState {
   std::istream& in;
-  std::vector<Token> line = {};
+  std::vector<Lexeme> line = {};
   Lines lines = {};
   int64_t lineStart = 0;
 
@@ -158,7 +158,7 @@ static const std::unordered_map<lexState, lexFunc> lexStateFuncs({
            state.slurp([](char c) { return std::isalnum(c) || c == '.'; });
 
        int64_t end = state.in.tellg();
-       state.line.push_back(Token{start, end, Token::WORD, word});
+       state.line.push_back(Lexeme{start, end, Lexeme::WORD, word});
        return START;
      }},
     {PUNCT,
@@ -166,7 +166,7 @@ static const std::unordered_map<lexState, lexFunc> lexStateFuncs({
        int64_t start = state.in.tellg();
        char terminator = state.getc();
        state.line.push_back(
-           {start, start + 1, Token::PUNCT, std::string(1, terminator)});
+           {start, start + 1, Lexeme::PUNCT, std::string(1, terminator)});
        return START;
      }},
     {STRING,
@@ -176,7 +176,7 @@ static const std::unordered_map<lexState, lexFunc> lexStateFuncs({
        auto str = state.slurp([](char c) { return c != '"'; });
        state.get();  // consume the closing quote
        int64_t end = state.in.tellg();
-       state.line.push_back({start, end, Token::STRING, str});
+       state.line.push_back({start, end, Lexeme::STRING, str});
        return START;
      }},
     {COMMENT,
@@ -212,7 +212,7 @@ static const std::unordered_map<lexState, lexFunc> lexStateFuncs({
        }
 
        int64_t end = state.in.tellg();
-       state.line.push_back(Token{start, end, Token::COMMENT, comment});
+       state.line.push_back(Lexeme{start, end, Lexeme::COMMENT, comment});
        return START;
      }},
 });
@@ -232,10 +232,10 @@ Lines removeComments(const Lines& lines) {
   result.reserve(lines.size());
 
   for (const auto& line : lines) {
-    std::vector<Token> tokens;
+    std::vector<Lexeme> tokens;
     tokens.reserve(line.size());
     std::copy_if(line.begin(), line.end(), std::back_inserter(tokens),
-                 [](const Token& t) { return t.type != Token::COMMENT; });
+                 [](const Lexeme& t) { return t.type != Lexeme::COMMENT; });
     if (!tokens.empty()) {
       result.push_back({line.loc, tokens});
     }
@@ -244,8 +244,8 @@ Lines removeComments(const Lines& lines) {
   return result;
 }
 
-std::vector<Token> flatten(const Lines& lines) {
-  std::vector<Token> result;
+std::vector<Lexeme> flatten(const Lines& lines) {
+  std::vector<Lexeme> result;
   for (const auto& line : lines) {
     std::copy(line.begin(), line.end(), std::back_inserter(result));
   }

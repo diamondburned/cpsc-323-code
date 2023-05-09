@@ -54,16 +54,16 @@ class Parser {
 class Parser::SyntaxError : public std::runtime_error {
  public:
   const Lexer::Lines& file;  // the entire program
-  Lexer::Token lexeme;       // where the error occurred
+  Lexer::Lexeme lexeme;      // where the error occurred
 
-  SyntaxError(const Lexer::Lines& file, Lexer::Token lexeme,
+  SyntaxError(const Lexer::Lines& file, Lexer::Lexeme lexeme,
               std::string message)
       : std::runtime_error(formatError(file, lexeme, message)),
         file(file),
         lexeme(lexeme) {}
 
  private:
-  static std::string formatError(const Lexer::Lines& file, Lexer::Token lexeme,
+  static std::string formatError(const Lexer::Lines& file, Lexer::Lexeme lexeme,
                                  std::string message) {
     std::stringstream ss;
     ss << "syntax error at word " << std::quoted(lexeme.value) << ": "
@@ -126,8 +126,8 @@ class Parser::Token::Value {
 
   Value(Token token) : type(TOKEN), token(std::make_unique<Token>(token)) {}
 
-  Value(Lexer::Token literal)
-      : type(LITERAL), literal(std::make_unique<Lexer::Token>(literal)) {}
+  Value(Lexer::Lexeme literal)
+      : type(LITERAL), literal(std::make_unique<Lexer::Lexeme>(literal)) {}
 
   Value(const Value& other) : type(other.type) {
     switch (type) {
@@ -137,7 +137,7 @@ class Parser::Token::Value {
         token = std::make_unique<Token>(*other.token);
         break;
       case LITERAL:
-        literal = std::make_unique<Lexer::Token>(*other.literal);
+        literal = std::make_unique<Lexer::Lexeme>(*other.literal);
         break;
     }
   }
@@ -152,12 +152,12 @@ class Parser::Token::Value {
     return *token;
   }
 
-  Lexer::Token* getLiteral() {
+  Lexer::Lexeme* getLiteral() {
     assertType(LITERAL);
     return literal.get();
   }
 
-  Lexer::Token getLiteral() const {
+  Lexer::Lexeme getLiteral() const {
     assertType(LITERAL);
     return *literal;
   }
@@ -186,5 +186,5 @@ class Parser::Token::Value {
   // I'm balls deep in this shit. I hate C++ so much.
   // You can hardly pick a worse language for this university.
   std::unique_ptr<Token> token;
-  std::unique_ptr<Lexer::Token> literal;
+  std::unique_ptr<Lexer::Lexeme> literal;
 };

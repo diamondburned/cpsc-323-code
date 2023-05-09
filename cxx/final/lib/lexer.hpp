@@ -42,7 +42,7 @@ struct Location {
   int length() const { return end - start; }
 };
 
-struct Token {
+struct Lexeme {
   enum Type {
     WORD,
     PUNCT,
@@ -54,25 +54,25 @@ struct Token {
   Type type;
   std::string value;
 
-  Token() : type(WORD), value("") {}  // EOF token
+  Lexeme() : type(WORD), value("") {}  // EOF token
 
-  Token(int64_t start, int64_t end, Type type, std::string value)
+  Lexeme(int64_t start, int64_t end, Type type, std::string value)
       : loc{start, end}, type(type), value(value) {}
 
-  Token(Location loc, Type type, std::string value)
+  Lexeme(Location loc, Type type, std::string value)
       : loc(loc), type(type), value(value) {}
 
   bool isEOF() const { return loc.start == -1 && loc.end == -1; }
 
   // slice returns a new token that is a slice of the current token.
-  Token slice(int64_t start, int64_t end) const {
-    return Token(loc.start + start, loc.start + end, type,
-                 value.substr(start, end - start));
+  Lexeme slice(int64_t start, int64_t end) const {
+    return Lexeme(loc.start + start, loc.start + end, type,
+                  value.substr(start, end - start));
   }
 
   // separate returns a list of tokens of one character each.
-  std::vector<Token> separate() const {
-    std::vector<Token> tokens;
+  std::vector<Lexeme> separate() const {
+    std::vector<Lexeme> tokens;
     for (size_t i = 0; i < value.size(); i++) {
       tokens.push_back(slice(i, i + 1));
     }
@@ -80,22 +80,24 @@ struct Token {
   }
 
   // join joins the current token with the other token.
-  void join(const Token& other) {
+  void join(const Lexeme& other) {
     loc.end = other.loc.end;
     value += other.value;
   }
 
   // isLeftOf returns true if the current token is directly left of the other
   // token.
-  bool isLeftOf(const Token& other) const { return loc.end == other.loc.start; }
+  bool isLeftOf(const Lexeme& other) const {
+    return loc.end == other.loc.start;
+  }
 
-  bool includes(const Token& other) const { return loc.includes(other.loc); }
+  bool includes(const Lexeme& other) const { return loc.includes(other.loc); }
 
-  bool operator==(const Token& other) const {
+  bool operator==(const Lexeme& other) const {
     return loc == other.loc && type == other.type && value == other.value;
   }
 
-  friend std::ostream& operator<<(std::ostream& out, const Token& t) {
+  friend std::ostream& operator<<(std::ostream& out, const Lexeme& t) {
     switch (t.type) {
       case WORD:
       case PUNCT:
@@ -112,14 +114,14 @@ struct Token {
   };
 };
 
-struct Line : std::vector<Token> {
+struct Line : std::vector<Lexeme> {
   Location loc;
 
-  Line(int64_t start, int64_t end, std::vector<Token> tokens)
-      : std::vector<Token>(tokens), loc({start, end}) {}
+  Line(int64_t start, int64_t end, std::vector<Lexeme> tokens)
+      : std::vector<Lexeme>(tokens), loc({start, end}) {}
 
-  Line(Location loc, std::vector<Token> tokens)
-      : std::vector<Token>(tokens), loc(loc) {}
+  Line(Location loc, std::vector<Lexeme> tokens)
+      : std::vector<Lexeme>(tokens), loc(loc) {}
 
   friend std::ostream& operator<<(std::ostream& out, const Line& line) {
     size_t i = 0;
@@ -175,7 +177,7 @@ struct Lines : std::vector<Line> {
 
 Lines lex(std::istream& in);
 Lines removeComments(const Lines& lines);
-std::vector<Token> flatten(const Lines& lines);
+std::vector<Lexeme> flatten(const Lines& lines);
 
 enum printFlags {
   NONE = 0,

@@ -26,9 +26,9 @@ void push_vector(std::stack<T>& stack, const std::vector<T>& values) {
 }
 
 // lexemeMatches returns true if the lexeme matches the expected value.
-bool lexemeMatches(Lexer::Token lexeme, std::string expects) {
+bool lexemeMatches(Lexer::Lexeme lexeme, std::string expects) {
   switch (lexeme.type) {
-    case Lexer::Token::STRING:
+    case Lexer::Lexeme::STRING:
       return expects == SIGMA;
     default:
       return expects == lexeme.value;
@@ -37,28 +37,28 @@ bool lexemeMatches(Lexer::Token lexeme, std::string expects) {
 
 struct sentinel {
   std::string type;
-  Lexer::Token lexeme;
+  Lexer::Lexeme lexeme;
   Parser::Token* node;
 };
 
 Parser::Program Parser::parse(const Lexer::Lines& file) const {
   if (file.empty()) {
-    throw Parser::SyntaxError(file, Lexer::Token(), "empty file");
+    throw Parser::SyntaxError(file, Lexer::Lexeme(), "empty file");
   }
 
-  std::stack<Lexer::Token> lexemeStack;
+  std::stack<Lexer::Lexeme> lexemeStack;
   push_vector(lexemeStack, Lexer::flatten(file));
 
   Parser::Program root(file);
 
   // Adds initials to the stack
   std::stack<sentinel> parseStack;
-  parseStack.push(sentinel{"$", Lexer::Token(), nullptr});
+  parseStack.push(sentinel{"$", Lexer::Lexeme(), nullptr});
   parseStack.push(sentinel{startingGrammar.first, lexemeStack.top(), &root});
 
   while (!parseStack.empty() && !lexemeStack.empty()) {
     auto lexeme = lexemeStack.top();
-    if (lexeme.type == Lexer::Token::WORD && lexeme.value.length() > 1) {
+    if (lexeme.type == Lexer::Lexeme::WORD && lexeme.value.length() > 1) {
       if (!reserved.contains(lexeme.value)) {
         // Replace the lexeme with the split lexemes.
         lexemeStack.pop();
@@ -86,7 +86,7 @@ Parser::Program Parser::parse(const Lexer::Lines& file) const {
     std::vector<std::string> tableEntry;
     try {
       std::string value = lexeme.value;
-      if (lexeme.type == Lexer::Token::Type::STRING) {
+      if (lexeme.type == Lexer::Lexeme::Type::STRING) {
         // All string literals are represented as a sigma in the table.
         // Mask the value as a sigma before looking up in the table.
         value = SIGMA;

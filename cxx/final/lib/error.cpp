@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-std::string formatLine(const Lexer::Lines& lines, Lexer::Token lexeme) {
+std::string formatLine(const Lexer::Lines& lines, Lexer::Lexeme lexeme) {
   return formatLine(lines, lexeme.loc);
 }
 
