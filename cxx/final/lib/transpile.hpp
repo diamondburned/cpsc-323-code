@@ -4,11 +4,9 @@
 
 #include "parser.hpp"
 
-class CTranspiler {
- public:
+struct CTranspiler {
   class TranspileError;
 
-  CTranspiler() = default;
   static void transpile(std::ostream& out, const Parser::Program& program);
 };
 
@@ -29,11 +27,5 @@ class CTranspiler::TranspileError : public std::runtime_error {
  private:
   static std::string formatError(const Parser::Program& program,
                                  const Parser::Token& token,
-                                 std::string message) {
-    std::stringstream ss;
-    ss << "transpile error at token " << std::quoted(extractLiterals(token))
-       << " " << token.type << ": " << message
-       << formatLine(program.file, token.location());
-    return ss.str();
-  }
+                                 std::string message);
 };

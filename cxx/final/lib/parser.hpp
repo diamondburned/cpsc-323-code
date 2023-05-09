@@ -45,6 +45,7 @@ class Parser {
   std::unordered_map<std::string,
                      std::map<std::string, std::vector<std::string>>>
       parsingTable;
+
   std::pair<std::string, std::vector<std::string>> startingGrammar;
 
   std::unordered_set<std::string> reserved;
@@ -64,12 +65,7 @@ class Parser::SyntaxError : public std::runtime_error {
 
  private:
   static std::string formatError(const Lexer::Lines& file, Lexer::Lexeme lexeme,
-                                 std::string message) {
-    std::stringstream ss;
-    ss << "syntax error at word " << std::quoted(lexeme.value) << ": "
-       << message << formatLine(file, lexeme);
-    return ss.str();
-  }
+                                 std::string message);
 };
 
 class Parser::Token {
@@ -82,10 +78,6 @@ class Parser::Token {
 
   Token() : type("$") {}
   Token(const std::string& type) : type(type) {}
-
-  // walk does a depth-first traversal of the tree, calling the callback on each
-  // node.
-  void walk(std::function<void(const Value&)> callback) const;
 
   friend std::ostream& operator<<(std::ostream& out, const Token& token) {
     token.print(out);

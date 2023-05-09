@@ -47,7 +47,7 @@ Parser::Program Parser::parse(const Lexer::Lines& file) const {
   }
 
   std::stack<Lexer::Lexeme> lexemeStack;
-  push_vector(lexemeStack, Lexer::flatten(file));
+  push_vector(lexemeStack, file.flatten());
 
   Parser::Program root(file);
 
@@ -163,13 +163,13 @@ void indent(std::ostream& out, int level) {
   }
 }
 
-void Parser::Token::walk(std::function<void(const Value&)> callback) const {
-  for (const auto& child : children) {
-    callback(child);
-    if (child.type == Parser::Token::Value::Type::TOKEN) {
-      child.getToken().walk(callback);
-    }
-  }
+std::string Parser::SyntaxError::formatError(const Lexer::Lines& file,
+                                             Lexer::Lexeme lexeme,
+                                             std::string message) {
+  std::stringstream ss;
+  ss << "syntax error at word " << std::quoted(lexeme.value) << ": " << message
+     << formatLine(file, lexeme);
+  return ss.str();
 }
 
 void Parser::Token::print(std::ostream& out, int level) const {

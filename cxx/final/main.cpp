@@ -20,7 +20,8 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  auto file = Lexer::removeComments(Lexer::lex(in));
+  auto file = Lexer::lex(in);
+  file = file.removeComments();
 
   std::ofstream stage1(inputPath + ".1.txt");
   stage1 << file << std::endl;

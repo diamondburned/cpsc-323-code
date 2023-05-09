@@ -10,13 +10,11 @@
 #include <unordered_map>
 #include <vector>
 
-namespace Lexer {
-
 namespace {
 struct lexingState {
   std::istream& in;
-  std::vector<Lexeme> line = {};
-  Lines lines = {};
+  std::vector<Lexer::Lexeme> line = {};
+  Lexer::Lines lines = {};
   int64_t lineStart = 0;
 
   lexingState(std::istream& in_) : in(in_) {}
@@ -158,15 +156,16 @@ static const std::unordered_map<lexState, lexFunc> lexStateFuncs({
            state.slurp([](char c) { return std::isalnum(c) || c == '.'; });
 
        int64_t end = state.in.tellg();
-       state.line.push_back(Lexeme{start, end, Lexeme::WORD, word});
+       state.line.push_back(
+           Lexer::Lexeme{start, end, Lexer::Lexeme::WORD, word});
        return START;
      }},
     {PUNCT,
      [](lexingState& state) {
        int64_t start = state.in.tellg();
        char terminator = state.getc();
-       state.line.push_back(
-           {start, start + 1, Lexeme::PUNCT, std::string(1, terminator)});
+       state.line.push_back({start, start + 1, Lexer::Lexeme::PUNCT,
+                             std::string(1, terminator)});
        return START;
      }},
     {STRING,
@@ -176,7 +175,7 @@ static const std::unordered_map<lexState, lexFunc> lexStateFuncs({
        auto str = state.slurp([](char c) { return c != '"'; });
        state.get();  // consume the closing quote
        int64_t end = state.in.tellg();
-       state.line.push_back({start, end, Lexeme::STRING, str});
+       state.line.push_back({start, end, Lexer::Lexeme::STRING, str});
        return START;
      }},
     {COMMENT,
@@ -212,13 +211,14 @@ static const std::unordered_map<lexState, lexFunc> lexStateFuncs({
        }
 
        int64_t end = state.in.tellg();
-       state.line.push_back(Lexeme{start, end, Lexeme::COMMENT, comment});
+       state.line.push_back(
+           Lexer::Lexeme{start, end, Lexer::Lexeme::COMMENT, comment});
        return START;
      }},
 });
 }  // namespace
 
-Lines lex(std::istream& in) {
+Lexer::Lines Lexer::lex(std::istream& in) {
   lexingState lexing(in);
   lexState lex = START;
   while (lex != END) {
@@ -227,15 +227,104 @@ Lines lex(std::istream& in) {
   return lexing.lines;
 }
 
-Lines removeComments(const Lines& lines) {
-  Lines result;
-  result.reserve(lines.size());
+int Lexer::Location::length() const { return end - start; }
 
-  for (const auto& line : lines) {
-    std::vector<Lexeme> tokens;
+bool Lexer::Location::isEOF() const { return start == -1 && end == -1; }
+
+bool Lexer::Location::includes(const Location& other) const {
+  return start <= other.start && other.end <= end;
+}
+
+Lexer::Location Lexer::Location::merge(const Location& other) const {
+  if (other.isEOF()) {
+    return *this;
+  }
+  Location merged(*this);
+  if (merged.start == -1 || other.start < merged.start) {
+    merged.start = other.start;
+  }
+  if (merged.end == -1 || other.end > merged.end) {
+    merged.end = other.end;
+  }
+  return merged;
+}
+
+bool Lexer::Lexeme::isEOF() const { return loc.start == -1 && loc.end == -1; }
+
+bool Lexer::Lexeme::includes(const Lexeme& other) const {
+  return loc.includes(other.loc);
+}
+
+Lexer::Lexeme Lexer::Lexeme::slice(int64_t start, int64_t end) const {
+  return Lexeme(loc.start + start, loc.start + end, type,
+                value.substr(start, end - start));
+}
+
+std::vector<Lexer::Lexeme> Lexer::Lexeme::separate() const {
+  std::vector<Lexeme> tokens;
+  for (size_t i = 0; i < value.size(); i++) {
+    tokens.push_back(slice(i, i + 1));
+  }
+  return tokens;
+}
+
+void Lexer::Lexeme::print(std::ostream& out) const {
+  switch (type) {
+    case WORD:
+    case PUNCT:
+      out << value;
+      break;
+    case STRING:
+      out << std::quoted(value);
+      break;
+    case COMMENT:
+      out << "// " << value << " //";
+      break;
+  }
+}
+
+Lexer::Location Lexer::Line::relativeLocation(const Location& loc) const {
+  int col = 0;
+  for (const auto& t : *this) {
+    if (t.loc.includes(loc)) {
+      return {col, col + t.loc.length()};
+    }
+    col += t.loc.length() + 1;
+  }
+  return {-1, -1};
+}
+
+void Lexer::Line::print(std::ostream& out) const {
+  size_t i = 0;
+  for (const auto& token : *this) {
+    if (i > 0 && token.value != ".") {
+      out << " ";
+    }
+    out << token;
+    i++;
+  }
+}
+
+size_t Lexer::Lines::containingLine(const Lexer::Location& loc) const {
+  for (size_t i = 0; i < size(); i++) {
+    if (at(i).loc.includes(loc)) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+Lexer::Lines Lexer::Lines::removeComments() const {
+  Lexer::Lines result;
+  result.reserve(size());
+
+  for (const auto& line : *this) {
+    std::vector<Lexer::Lexeme> tokens;
     tokens.reserve(line.size());
     std::copy_if(line.begin(), line.end(), std::back_inserter(tokens),
-                 [](const Lexeme& t) { return t.type != Lexeme::COMMENT; });
+                 [](const Lexer::Lexeme& t) {
+                   return t.type != Lexer::Lexeme::COMMENT;
+                 });
     if (!tokens.empty()) {
       result.push_back({line.loc, tokens});
     }
@@ -244,11 +333,19 @@ Lines removeComments(const Lines& lines) {
   return result;
 }
 
-std::vector<Lexeme> flatten(const Lines& lines) {
-  std::vector<Lexeme> result;
-  for (const auto& line : lines) {
+std::vector<Lexer::Lexeme> Lexer::Lines::flatten() const {
+  std::vector<Lexer::Lexeme> result;
+  for (const auto& line : *this) {
     std::copy(line.begin(), line.end(), std::back_inserter(result));
   }
   return result;
 }
-}  // namespace Lexer
+
+void Lexer::Lines::print(std::ostream& out) const {
+  for (size_t i = 0; i < size(); i++) {
+    out << at(i);
+    if (i < size() - 1) {
+      out << "\n";
+    }
+  }
+}

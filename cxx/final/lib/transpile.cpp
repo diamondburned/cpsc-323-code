@@ -244,3 +244,13 @@ void CTranspiler::transpile(std::ostream& out, const Parser::Program& program) {
   ctranspiler trans(out, program);
   trans.walk(program);
 }
+
+std::string CTranspiler::TranspileError::formatError(
+    const Parser::Program& program, const Parser::Token& token,
+    std::string message) {
+  std::stringstream ss;
+  ss << "transpile error at token " << std::quoted(extractLiterals(token))
+     << " " << token.type << ": " << message
+     << formatLine(program.file, token.location());
+  return ss.str();
+}
