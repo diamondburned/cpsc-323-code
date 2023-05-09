@@ -2,7 +2,7 @@ program s2023 ;
 var
 p1 , pr : integer ;
 begin
-p1 = 33 ;
+p1 33 ;
 p2q = 412 ;
 pr = p1 + p2q ;
 display ( pr ) ;

@@ -12,9 +12,14 @@ struct Location {
   int64_t start;
   int64_t end;
 
+  Location() : start(-1), end(-1) {}
+  Location(int64_t start, int64_t end) : start(start), end(end) {}
+
   bool operator==(const Location& other) const {
     return start == other.start && end == other.end;
   }
+
+  bool isEOF() const { return start == -1 && end == -1; }
 
   bool includes(const Location& other) const {
     return start <= other.start && other.end <= end;
@@ -33,7 +38,7 @@ struct Token {
   Type type;
   std::string value;
 
-  Token() : loc{-1, -1}, type(WORD), value("") {}  // EOF token
+  Token() : type(WORD), value("") {}  // EOF token
 
   Token(int64_t start, int64_t end, Type type, std::string value)
       : loc{start, end}, type(type), value(value) {}

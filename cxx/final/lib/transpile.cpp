@@ -1,6 +1,7 @@
 #include "transpile.hpp"
 
 #include <iomanip>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -9,7 +10,6 @@ const std::unordered_map<std::string, std::string> typeMap{
     {"integer", "int"},
 };
 
-// extractLiterals walks token and accumulates all literals into a string.
 std::string extractLiterals(const Parser::Token& token) {
   std::stringstream buf;
   std::function<void(const Parser::Token&)> rec;
@@ -31,9 +31,29 @@ std::string extractLiterals(const Parser::Token& token) {
   return buf.str();
 }
 
-struct ctranspiler {
+class ctranspiler {
+ private:
   std::unordered_set<std::string> variables;
 
+  void addVariable(const Parser::Token& id) {
+    const auto literal = extractLiterals(id);
+    if (variables.contains(literal)) {
+      throw CTranspiler::TranspileError(
+          id, "variable " + literal + " already declared");
+    }
+
+    variables.insert(literal);
+  }
+
+  void assertVariable(const Parser::Token& id) {
+    const auto literal = extractLiterals(id);
+    if (!variables.contains(literal)) {
+      throw CTranspiler::TranspileError(
+          id, "variable " + literal + " not declared");
+    }
+  }
+
+ public:
   void walkProgram(std::ostream& out, const Parser::Token& token) {
     if (token.children.empty()) {
       return;  // base case
@@ -68,16 +88,9 @@ struct ctranspiler {
     if (token.type == "<dec>") {
       const auto identifier = token.children.at(0).getToken();  // <identifier>
       const auto prime = token.children.at(1).getToken();       // <dec-prime>
+      addVariable(identifier);
 
-      const auto identifierLiteral = extractLiterals(identifier);
-      if (variables.contains(identifierLiteral)) {
-        throw std::runtime_error("variable " + identifierLiteral +
-                                 " already declared");
-      }
-
-      variables.insert(identifierLiteral);
-
-      out << identifierLiteral;
+      out << extractLiterals(identifier);
       walkProgram(out, prime);
 
       return;
@@ -86,6 +99,7 @@ struct ctranspiler {
     if (token.type == "<dec-prime>") {
       const auto identifier = token.children.at(1).getToken();  // <identifier>
       const auto prime = token.children.at(2).getToken();       // <dec-prime>
+      addVariable(identifier);
 
       out << ", " << extractLiterals(identifier);
       walkProgram(out, prime);
@@ -150,13 +164,9 @@ struct ctranspiler {
       const auto identifier = token.children.at(0).getToken();  // <identifier>
       const auto expression = token.children.at(2).getToken();  // <expr>
 
-      const auto identifierLiteral = extractLiterals(identifier);
-      if (!variables.contains(identifierLiteral)) {
-        throw std::runtime_error("variable " + identifierLiteral +
-                                 " not declared");
-      }
+      assertVariable(identifier);
 
-      out << identifierLiteral << " = ";
+      out << extractLiterals(identifier) << " = ";
       walkProgram(out, expression);
 
       return;

@@ -50,12 +50,13 @@ class Parser {
 };
 
 class Parser::SyntaxError : public std::runtime_error {
+ public:
   Lexer::Token lexeme;  // where the error occurred
 
- public:
   SyntaxError(Lexer::Token lexeme, std::string message)
       : std::runtime_error(formatError(lexeme, message)), lexeme(lexeme) {}
 
+ private:
   static std::string formatError(Lexer::Token lexeme, std::string message) {
     std::stringstream ss;
     ss << "syntax error at word " << std::quoted(lexeme.value) << ": "
