@@ -7,11 +7,9 @@
 struct CTranspiler {
   class TranspileError;
 
+  // transpile transpiles the given program to C++ and writes the result to out.
   static void transpile(std::ostream& out, const Parser::Program& program);
 };
-
-// extractLiterals walks token and accumulates all literals into a string.
-std::string extractLiterals(const Parser::Token& token);
 
 class CTranspiler::TranspileError : public std::runtime_error {
  public:

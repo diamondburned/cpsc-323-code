@@ -84,7 +84,11 @@ class Parser::Token {
     return out;
   };
 
+  // location returns the location covering the entire token.
   Lexer::Location location() const;
+
+  // extractLiterals walks token and accumulates all literals into a string.
+  std::string extractLiterals() const;
 
  private:
   bool isEOF() const { return type == "$"; }

@@ -211,3 +211,24 @@ Lexer::Location Parser::Token::location() const {
   }
   return loc;
 }
+
+std::string Parser::Token::extractLiterals() const {
+  std::stringstream buf;
+  std::function<void(const Parser::Token&)> rec;
+  rec = [&buf, &rec](const Parser::Token& token) {
+    for (const auto& child : token.children) {
+      switch (child.type) {
+        case Parser::Token::Value::Type::LITERAL:
+          buf << child.getLiteral();
+          break;
+        case Parser::Token::Value::Type::TOKEN:
+          rec(child.getToken());
+          break;
+        default:
+          break;
+      }
+    }
+  };
+  rec(*this);
+  return buf.str();
+}

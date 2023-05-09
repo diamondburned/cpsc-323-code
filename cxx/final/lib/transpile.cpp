@@ -10,27 +10,6 @@ const std::unordered_map<std::string, std::string> typeMap{
     {"integer", "int"},
 };
 
-std::string extractLiterals(const Parser::Token& token) {
-  std::stringstream buf;
-  std::function<void(const Parser::Token&)> rec;
-  rec = [&buf, &rec](const Parser::Token& token) {
-    for (const auto& child : token.children) {
-      switch (child.type) {
-        case Parser::Token::Value::Type::LITERAL:
-          buf << child.getLiteral();
-          break;
-        case Parser::Token::Value::Type::TOKEN:
-          rec(child.getToken());
-          break;
-        default:
-          break;
-      }
-    }
-  };
-  rec(token);
-  return buf.str();
-}
-
 class ctranspiler {
  private:
   std::ostream& out;
@@ -39,7 +18,7 @@ class ctranspiler {
   std::unordered_set<std::string> variables;
 
   void addVariable(const Parser::Token& id) {
-    const auto literal = extractLiterals(id);
+    const auto literal = id.extractLiterals();
     if (variables.contains(literal)) {
       throw CTranspiler::TranspileError(
           program, id, "variable " + literal + " already declared");
@@ -49,7 +28,7 @@ class ctranspiler {
   }
 
   void assertVariable(const Parser::Token& id) {
-    const auto literal = extractLiterals(id);
+    const auto literal = id.extractLiterals();
     if (!variables.contains(literal)) {
       throw CTranspiler::TranspileError(
           program, id, "variable " + literal + " not declared");
@@ -96,7 +75,7 @@ class ctranspiler {
       const auto prime = token.children.at(1).getToken();       // <dec-prime>
       addVariable(identifier);
 
-      out << extractLiterals(identifier);
+      out << identifier.extractLiterals();
       walk(prime);
 
       return;
@@ -107,14 +86,14 @@ class ctranspiler {
       const auto prime = token.children.at(2).getToken();       // <dec-prime>
       addVariable(identifier);
 
-      out << ", " << extractLiterals(identifier);
+      out << ", " << identifier.extractLiterals();
       walk(prime);
 
       return;
     }
 
     if (token.type == "<type>") {
-      const auto ourType = extractLiterals(token);
+      const auto ourType = token.extractLiterals();
       const auto cxxType = typeMap.at(ourType);
       out << cxxType;
 
@@ -156,11 +135,11 @@ class ctranspiler {
         const auto string = token.children.at(0).getLiteral();  // σ
         const auto identifier =
             token.children.at(2).getToken();  // <identifier>
-        out << " << " << string << " << " << extractLiterals(identifier);
+        out << " << " << string << " << " << identifier.extractLiterals();
       } else {
         const auto identifier =
             token.children.at(0).getToken();  // <identifier>
-        out << " << " << extractLiterals(identifier);
+        out << " << " << identifier.extractLiterals();
       }
 
       return;
@@ -172,7 +151,7 @@ class ctranspiler {
 
       assertVariable(identifier);
 
-      out << extractLiterals(identifier) << " = ";
+      out << identifier.extractLiterals() << " = ";
       walk(expression);
 
       return;
@@ -230,7 +209,7 @@ class ctranspiler {
         out << ")";
       } else {
         const auto child = token.children.at(0).getToken();
-        out << extractLiterals(child);
+        out << child.extractLiterals();
       }
 
       return;
@@ -249,7 +228,7 @@ std::string CTranspiler::TranspileError::formatError(
     const Parser::Program& program, const Parser::Token& token,
     std::string message) {
   std::stringstream ss;
-  ss << "transpile error at token " << std::quoted(extractLiterals(token))
+  ss << "transpile error at token " << std::quoted(token.extractLiterals())
      << " " << token.type << ": " << message
      << formatLine(program.file, token.location());
   return ss.str();
