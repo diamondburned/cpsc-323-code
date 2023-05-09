@@ -1,0 +1,18 @@
+program s2023;
+       // This program computs and pritns the value
+              of a given expression //
+       var
+          // declare variables
+          // declare
+          p1 ,    pr     : integer ;
+      begin
+              // initialize variables
+        p1            = 33;
+        p2q   =     412;
+        pr=p1+p2q;
+     display ( pr  );  // display pr
+                 // compute the value of the
+                  following expression //
+        pr = p1 * (p2q+ 2  * pr);
+        display ( "value=",      pr   ); // print the value of pr
+      end.
