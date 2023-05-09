@@ -4,10 +4,6 @@
 #include <string>
 #include <unordered_map>
 
-void walkProgram(std::ostream& out, const Parser::Token& token);
-void walkChildren(std::ostream& out,
-                  const std::vector<Parser::Token::Value>& children);
-
 const std::unordered_map<std::string, std::string> typeMap{
     {"integer", "int"},
 };
@@ -32,22 +28,6 @@ std::string extractLiterals(const Parser::Token& token) {
   };
   rec(token);
   return buf.str();
-}
-
-void walkChildren(std::ostream& out,
-                  const std::vector<Parser::Token::Value>& children) {
-  for (const auto& child : children) {
-    switch (child.type) {
-      case Parser::Token::Value::Type::TOKEN:
-        walkProgram(out, child.getToken());
-        break;
-      case Parser::Token::Value::Type::LITERAL:
-        out << child.getLiteral();
-        break;
-      default:
-        break;
-    }
-  }
 }
 
 void walkProgram(std::ostream& out, const Parser::Token& token) {
