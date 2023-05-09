@@ -4,6 +4,7 @@
 #include "lib/grammar.hpp"
 #include "lib/lexer.hpp"
 #include "lib/parser.hpp"
+#include "lib/transpile.hpp"
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {
@@ -21,7 +22,7 @@ int main(int argc, char* argv[]) {
 
   auto lines = Lexer::removeComments(Lexer::lex(in));
 
-  std::ofstream stage1(inputPath + ".1.tmp");
+  std::ofstream stage1(inputPath + ".1.txt");
   stage1 << lines << std::endl;
   stage1.close();
 
@@ -32,7 +33,11 @@ int main(int argc, char* argv[]) {
 
   Parser::Token program = parser.parse(Lexer::flatten(lines));
 
-  std::ofstream stage2(inputPath + ".2.tmp");
+  std::ofstream stage2(inputPath + ".2.txt");
   stage2 << program << std::endl;
   stage2.close();
+
+  std::ofstream stage3(inputPath + ".3.cpp");
+  CTranspiler::transpile(stage3, program);
+  stage3.close();
 }

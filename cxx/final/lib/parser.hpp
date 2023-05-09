@@ -3,6 +3,7 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -142,9 +143,23 @@ class Parser::Token::Value {
   }
 
  private:
+  static std::string typeAsString(Type t) {
+    switch (t) {
+      case TOKEN:
+        return "TOKEN";
+      case LITERAL:
+        return "LITERAL";
+      default:
+        return "NONE";
+    }
+  }
+
   void assertType(Type t) const {
     if (type != t) {
-      throw std::logic_error("value type mismatch");
+      std::stringstream ss;
+      ss << "expected type " << typeAsString(t) << ", got "
+         << typeAsString(type);
+      throw std::logic_error(ss.str());
     }
   }
 
