@@ -21,7 +21,7 @@ let lib  = systemPkgs.lib;
 	'';
 
 	mkshell = pkgs.mkShell.override {
-		stdenv = pkgs.gccStdenv;
+		stdenv = pkgs.gcc12Stdenv;
 	};
 
 	PROJECT_ROOT   = builtins.toString ./.;
