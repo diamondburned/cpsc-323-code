@@ -24,6 +24,22 @@ struct Location {
   bool includes(const Location& other) const {
     return start <= other.start && other.end <= end;
   }
+
+  Location merge(const Location& other) const {
+    if (other.isEOF()) {
+      return *this;
+    }
+    Location merged(*this);
+    if (merged.start == -1 || other.start < merged.start) {
+      merged.start = other.start;
+    }
+    if (merged.end == -1 || other.end > merged.end) {
+      merged.end = other.end;
+    }
+    return merged;
+  }
+
+  int length() const { return end - start; }
 };
 
 struct Token {
@@ -50,7 +66,8 @@ struct Token {
 
   // slice returns a new token that is a slice of the current token.
   Token slice(int64_t start, int64_t end) const {
-    return Token(start, end, type, value.substr(start, end - start));
+    return Token(loc.start + start, loc.start + end, type,
+                 value.substr(start, end - start));
   }
 
   // separate returns a list of tokens of one character each.
@@ -115,6 +132,19 @@ struct Line : std::vector<Token> {
     }
     return out;
   };
+
+  // relativeLocation returns the location of the given token relative to the
+  // start of the line. If the token is not found, it returns {-1, -1}.
+  Location relativeLocation(const Location& loc) const {
+    int col = 0;
+    for (const auto& t : *this) {
+      if (t.loc.includes(loc)) {
+        return {col, col + t.loc.length()};
+      }
+      col += t.loc.length() + 1;
+    }
+    return {-1, -1};
+  }
 };
 
 struct Lines : std::vector<Line> {
@@ -130,6 +160,17 @@ struct Lines : std::vector<Line> {
     }
     return out;
   };
+
+  // containingLine returns the line number that contains the given token or -1
+  // if the token is not found.
+  size_t containingLine(const Location& loc) const {
+    for (size_t i = 0; i < size(); i++) {
+      if (at(i).loc.includes(loc)) {
+        return i;
+      }
+    }
+    return -1;
+  }
 };
 
 Lines lex(std::istream& in);

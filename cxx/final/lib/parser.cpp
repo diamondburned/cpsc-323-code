@@ -41,34 +41,20 @@ struct sentinel {
   Parser::Token* node;
 };
 
-Parser::Token Parser::parse(const std::vector<Lexer::Token>& lexemes) const {
-  if (lexemes.empty()) {
-    return Parser::Token();
+Parser::Program Parser::parse(const Lexer::Lines& file) const {
+  if (file.empty()) {
+    throw Parser::SyntaxError(file, Lexer::Token(), "empty file");
   }
 
   std::stack<Lexer::Token> lexemeStack;
-  push_vector(lexemeStack, lexemes);
+  push_vector(lexemeStack, Lexer::flatten(file));
 
-  // std::vector<Lexer::Token> lexemes;
-  // for (const auto& token : inputLexemes) {
-  //   // Split words that are not terminals into individual characters for the
-  //   // parser to ingest.
-  //   if (token.type == Lexer::Token::WORD && !reserved.contains(token.value))
-  //   {
-  //     const auto separated = token.separate();
-  //     std::copy(separated.begin(), separated.end(),
-  //               std::back_inserter(lexemes));
-  //     continue;
-  //   }
-  //   lexemes.push_back(token);
-  // }
-
-  Parser::Token root = Parser::Token();
+  Parser::Program root(file);
 
   // Adds initials to the stack
   std::stack<sentinel> parseStack;
   parseStack.push(sentinel{"$", Lexer::Token(), nullptr});
-  parseStack.push(sentinel{startingGrammar.first, lexemes.at(0), &root});
+  parseStack.push(sentinel{startingGrammar.first, lexemeStack.top(), &root});
 
   while (!parseStack.empty() && !lexemeStack.empty()) {
     auto lexeme = lexemeStack.top();
@@ -90,7 +76,7 @@ Parser::Token Parser::parse(const std::vector<Lexer::Token>& lexemes) const {
     if (terminals.contains(type)) {
       if (!lexemeMatches(lexeme, type)) {
         throw Parser::SyntaxError(
-            lexeme, "unexpected terminal token, expecting " + type);
+            file, lexeme, "unexpected terminal token, expecting " + type);
       }
       node->add(lexeme);
       lexemeStack.pop();
@@ -109,12 +95,12 @@ Parser::Token Parser::parse(const std::vector<Lexer::Token>& lexemes) const {
     } catch (const std::exception& exception) {
       const auto errors = errorEntryTable.at(type);
       if (errors.contains(lexeme.value)) {
-        throw Parser::SyntaxError(lexeme, errors.at(lexeme.value));
+        throw Parser::SyntaxError(file, lexeme, errors.at(lexeme.value));
       }
       if (errors.contains("?")) {
-        throw Parser::SyntaxError(lexeme, errors.at("?"));
+        throw Parser::SyntaxError(file, lexeme, errors.at("?"));
       }
-      throw Parser::SyntaxError(lexeme,
+      throw Parser::SyntaxError(file, lexeme,
                                 "unexpected non-terminal, expecting " + type);
     }
 
@@ -207,4 +193,21 @@ void Parser::Token::print(std::ostream& out, int level) const {
 template <class T>
 Parser::Token::Value* Parser::Token::add(const T& value) {
   return &children.emplace_back(value);
+}
+
+Lexer::Location Parser::Token::location() const {
+  Lexer::Location loc;
+  for (const auto& child : children) {
+    switch (child.type) {
+      case Value::Type::TOKEN:
+        loc = loc.merge(child.getToken().location());
+        break;
+      case Value::Type::LITERAL:
+        loc = loc.merge(child.getLiteral().loc);
+        break;
+      default:
+        break;
+    }
+  }
+  return loc;
 }

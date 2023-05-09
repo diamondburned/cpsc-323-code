@@ -20,10 +20,10 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  auto lines = Lexer::removeComments(Lexer::lex(in));
+  auto file = Lexer::removeComments(Lexer::lex(in));
 
   std::ofstream stage1(inputPath + ".1.txt");
-  stage1 << lines << std::endl;
+  stage1 << file << std::endl;
   stage1.close();
 
   Grammar grammar("grammar.txt");
@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
   Parser parser(grammar);
   parser.loadErrorEntries("error-entry-messages.txt");
 
-  Parser::Token program = parser.parse(Lexer::flatten(lines));
+  Parser::Program program = parser.parse(file);
 
   std::ofstream stage2(inputPath + ".2.txt");
   stage2 << program << std::endl;

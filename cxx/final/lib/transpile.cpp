@@ -33,13 +33,16 @@ std::string extractLiterals(const Parser::Token& token) {
 
 class ctranspiler {
  private:
+  std::ostream& out;
+  const Parser::Program& program;
+
   std::unordered_set<std::string> variables;
 
   void addVariable(const Parser::Token& id) {
     const auto literal = extractLiterals(id);
     if (variables.contains(literal)) {
       throw CTranspiler::TranspileError(
-          id, "variable " + literal + " already declared");
+          program, id, "variable " + literal + " already declared");
     }
 
     variables.insert(literal);
@@ -49,12 +52,15 @@ class ctranspiler {
     const auto literal = extractLiterals(id);
     if (!variables.contains(literal)) {
       throw CTranspiler::TranspileError(
-          id, "variable " + literal + " not declared");
+          program, id, "variable " + literal + " not declared");
     }
   }
 
  public:
-  void walkProgram(std::ostream& out, const Parser::Token& token) {
+  ctranspiler(std::ostream& out, const Parser::Program& program)
+      : out(out), program(program) {}
+
+  void walk(const Parser::Token& token) {
     if (token.children.empty()) {
       return;  // base case
     }
@@ -64,8 +70,8 @@ class ctranspiler {
           << "\n"
           << "int main() {\n";
 
-      walkProgram(out, token.children.at(4).getToken());  // <dec-list>
-      walkProgram(out, token.children.at(6).getToken());  // <stat-list>
+      walk(token.children.at(4).getToken());  // <dec-list>
+      walk(token.children.at(6).getToken());  // <stat-list>
 
       out << "  return 0;\n"
           << "}\n";
@@ -77,9 +83,9 @@ class ctranspiler {
       const auto dec = token.children.at(0).getToken();   // <dec>
 
       out << "  ";
-      walkProgram(out, type);
+      walk(type);
       out << " ";
-      walkProgram(out, dec);
+      walk(dec);
       out << ";\n";
 
       return;
@@ -91,7 +97,7 @@ class ctranspiler {
       addVariable(identifier);
 
       out << extractLiterals(identifier);
-      walkProgram(out, prime);
+      walk(prime);
 
       return;
     }
@@ -102,7 +108,7 @@ class ctranspiler {
       addVariable(identifier);
 
       out << ", " << extractLiterals(identifier);
-      walkProgram(out, prime);
+      walk(prime);
 
       return;
     }
@@ -119,8 +125,8 @@ class ctranspiler {
       const auto stat = token.children.at(0).getToken();   // <stat>
       const auto prime = token.children.at(1).getToken();  // <stat-list-prime>
 
-      walkProgram(out, stat);
-      walkProgram(out, prime);
+      walk(stat);
+      walk(prime);
 
       return;
     }
@@ -129,7 +135,7 @@ class ctranspiler {
       const auto child = token.children.at(0).getToken();  // <write> | <assign>
 
       out << "  ";
-      walkProgram(out, child);
+      walk(child);
       out << ";\n";
 
       return;
@@ -139,7 +145,7 @@ class ctranspiler {
       const auto prime = token.children.at(2).getToken();  // <write-prime>
 
       out << "std::cout";
-      walkProgram(out, prime);
+      walk(prime);
       out << " << std::endl";
 
       return;
@@ -167,7 +173,7 @@ class ctranspiler {
       assertVariable(identifier);
 
       out << extractLiterals(identifier) << " = ";
-      walkProgram(out, expression);
+      walk(expression);
 
       return;
     }
@@ -176,8 +182,8 @@ class ctranspiler {
       const auto term = token.children.at(0).getToken();   // <term>
       const auto prime = token.children.at(1).getToken();  // <expr-prime>
 
-      walkProgram(out, term);
-      walkProgram(out, prime);
+      walk(term);
+      walk(prime);
 
       return;
     }
@@ -188,8 +194,8 @@ class ctranspiler {
       const auto prime = token.children.at(2).getToken();  // <expr-prime>
 
       out << " " << op << " ";
-      walkProgram(out, term);
-      walkProgram(out, prime);
+      walk(term);
+      walk(prime);
 
       return;
     }
@@ -198,8 +204,8 @@ class ctranspiler {
       const auto factor = token.children.at(0).getToken();  // <factor>
       const auto prime = token.children.at(1).getToken();   // <term-prime>
 
-      walkProgram(out, factor);
-      walkProgram(out, prime);
+      walk(factor);
+      walk(prime);
 
       return;
     }
@@ -210,8 +216,8 @@ class ctranspiler {
       const auto prime = token.children.at(2).getToken();   // <term-prime>
 
       out << " " << op << " ";
-      walkProgram(out, factor);
-      walkProgram(out, prime);
+      walk(factor);
+      walk(prime);
 
       return;
     }
@@ -220,7 +226,7 @@ class ctranspiler {
       if (token.children.size() == 3) {
         const auto expr = token.children.at(1).getToken();  // <expr>
         out << "(";
-        walkProgram(out, expr);
+        walk(expr);
         out << ")";
       } else {
         const auto child = token.children.at(0).getToken();
@@ -234,7 +240,7 @@ class ctranspiler {
   }
 };
 
-void CTranspiler::transpile(std::ostream& out, const Parser::Token& program) {
-  ctranspiler trans;
-  trans.walkProgram(out, program);
+void CTranspiler::transpile(std::ostream& out, const Parser::Program& program) {
+  ctranspiler trans(out, program);
+  trans.walk(program);
 }

@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "error.hpp"
 #include "grammar.hpp"
 #include "lexer.hpp"
 
@@ -14,6 +15,7 @@ class Parser {
  public:
   class SyntaxError;
   class Token;
+  class Program;
 
   /**
    * Instantiates a new ProgramParser object.
@@ -26,7 +28,7 @@ class Parser {
    * Compiles the given text file program.
    * @param inputFileLoc Text File of the program.
    */
-  Token parse(const std::vector<Lexer::Token>& tokens) const;
+  Program parse(const Lexer::Lines& file) const;
 
   /**
    * Loads the error entry message file into the parser. This specifies what
@@ -51,16 +53,21 @@ class Parser {
 
 class Parser::SyntaxError : public std::runtime_error {
  public:
-  Lexer::Token lexeme;  // where the error occurred
+  const Lexer::Lines& file;  // the entire program
+  Lexer::Token lexeme;       // where the error occurred
 
-  SyntaxError(Lexer::Token lexeme, std::string message)
-      : std::runtime_error(formatError(lexeme, message)), lexeme(lexeme) {}
+  SyntaxError(const Lexer::Lines& file, Lexer::Token lexeme,
+              std::string message)
+      : std::runtime_error(formatError(file, lexeme, message)),
+        file(file),
+        lexeme(lexeme) {}
 
  private:
-  static std::string formatError(Lexer::Token lexeme, std::string message) {
+  static std::string formatError(const Lexer::Lines& file, Lexer::Token lexeme,
+                                 std::string message) {
     std::stringstream ss;
     ss << "syntax error at word " << std::quoted(lexeme.value) << ": "
-       << message;
+       << message << formatLine(file, lexeme);
     return ss.str();
   }
 };
@@ -85,12 +92,24 @@ class Parser::Token {
     return out;
   };
 
+  Lexer::Location location() const;
+
  private:
   bool isEOF() const { return type == "$"; }
   void print(std::ostream& out, int level = 0) const;
 
   template <class T>
   Parser::Token::Value* add(const T& value);
+};
+
+class Parser::Program : public Parser::Token {
+ public:
+  friend class Parser;
+
+  const Lexer::Lines& file;
+
+ private:
+  Program(const Lexer::Lines& file) : Token(), file(file) {}
 };
 
 class Parser::Token::Value {
