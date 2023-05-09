@@ -59,9 +59,10 @@ class Parser::SyntaxError : public std::runtime_error {
 
   SyntaxError(const Lexer::Lines& file, Lexer::Lexeme lexeme,
               std::string message)
-      : std::runtime_error(formatError(file, lexeme, message)),
+      : std::runtime_error(
+            formatError(file, file.findCompleteLexeme(lexeme), message)),
         file(file),
-        lexeme(lexeme) {}
+        lexeme(file.findCompleteLexeme(lexeme)) {}
 
  private:
   static std::string formatError(const Lexer::Lines& file, Lexer::Lexeme lexeme,

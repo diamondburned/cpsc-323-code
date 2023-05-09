@@ -110,6 +110,10 @@ struct Lexer::Lines : std::vector<Line> {
   // -1 if the token is not found.
   size_t containingLine(const Location& loc) const;
 
+  // findCompleteLexeme returns the lexeme that covers the given token or the
+  // given lexeme if it it's not found.
+  Lexer::Lexeme findCompleteLexeme(const Lexer::Lexeme lexeme) const;
+
   // removeComments returns a new list of lines with all comments removed.
   Lines removeComments() const;
 

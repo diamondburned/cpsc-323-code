@@ -93,12 +93,14 @@ Parser::Program Parser::parse(const Lexer::Lines& file) const {
       }
       tableEntry = parsingTable.at(type).at(value);
     } catch (const std::exception& exception) {
-      const auto errors = errorEntryTable.at(type);
-      if (errors.contains(lexeme.value)) {
-        throw Parser::SyntaxError(file, lexeme, errors.at(lexeme.value));
-      }
-      if (errors.contains("?")) {
-        throw Parser::SyntaxError(file, lexeme, errors.at("?"));
+      if (errorEntryTable.contains(type)) {
+        const auto errors = errorEntryTable.at(type);
+        if (errors.contains(lexeme.value)) {
+          throw Parser::SyntaxError(file, lexeme, errors.at(lexeme.value));
+        }
+        if (errors.contains("?")) {
+          throw Parser::SyntaxError(file, lexeme, errors.at("?"));
+        }
       }
       throw Parser::SyntaxError(file, lexeme,
                                 "unexpected non-terminal, expecting " + type);
@@ -167,8 +169,8 @@ std::string Parser::SyntaxError::formatError(const Lexer::Lines& file,
                                              Lexer::Lexeme lexeme,
                                              std::string message) {
   std::stringstream ss;
-  ss << "syntax error at word " << std::quoted(lexeme.value) << ": " << message
-     << formatLine(file, lexeme);
+  ss << "syntax error near word " << std::quoted(lexeme.value) << ": "
+     << message << formatLine(file, lexeme);
   return ss.str();
 }
 

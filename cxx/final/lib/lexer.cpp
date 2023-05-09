@@ -314,6 +314,18 @@ size_t Lexer::Lines::containingLine(const Lexer::Location& loc) const {
   return -1;
 }
 
+Lexer::Lexeme Lexer::Lines::findCompleteLexeme(
+    const Lexer::Lexeme lexeme) const {
+  for (const auto& line : *this) {
+    for (const auto& token : line) {
+      if (token.includes(lexeme)) {
+        return token;
+      }
+    }
+  }
+  return lexeme;
+}
+
 Lexer::Lines Lexer::Lines::removeComments() const {
   Lexer::Lines result;
   result.reserve(size());
